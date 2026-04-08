@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Play Bubble.am, a free online multiplayer browser game. Eat smaller cells, avoid bigger ones, and climb the leaderboard. No download needed — play now!">
+    <meta name="keywords" content="bubbleam, bubble.am, bubleam, buble.am, bubbleam.pl, bubleroyal.com, bubleroyal, agario, agar, io, cell, cells, virus, bacteria, blob, game, games, web game, html5, fun, flash">
+    <meta name="robots" content="index, follow">
+    <meta name="viewport"
+        content="minimal-ui, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="google-site-verification" content="LiPNDr3AHPS_HBWWsUkIL3tYU5vIMQYR17AD7fvhuN4" />
+
+    <title>Bubble.am</title>
+
+    <link rel="canonical" href="https://bubbleam.site/">
+    <meta property="og:title" content="Bubble.am — Free Bubble.am Browser Game">
+    <meta property="og:description" content="Play Bubble.am free online. Eat smaller cells, avoid bigger ones, climb the leaderboard. No download needed!">
+    <meta property="og:url" content="https://bubbleam.site/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Bubble.am — Free Bubble.am Browser Game">
+    <meta name="twitter:description" content="Play Bubble.am free online. Eat smaller cells, avoid bigger ones!">
+
+    <link id="favicon" rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu:700" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/index.css" rel="stylesheet">
+    <script src="assets/js/footer.js"></script>
+    <style>
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        td {
+            padding: 6px 4px;
+            border-bottom: 1px solid #eee;
+        }
+
+        td:first-child {
+            color: #888;
+            width: 90px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="loginOverlay">
+        <div id="helloDialog">
+            <div style="font-size:14px; color:#888; margin-bottom:10px;">
+                <a href="index.html">Bubble.am</a> » Account
+            </div>
+            <div style="text-align:center; margin-bottom:10px;">
+                <strong>Account information</strong> |
+                <a href="password.html">Password</a> |
+                <a href="#" onclick="doLogout()">Logout</a>
+            </div>
+            <table>
+                <tr>
+                    <td>Account:</td>
+                    <td><span id="accType">-</span></td>
+                </tr>
+                <tr>
+                    <td>Name:</td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span id="accName">-</span>
+                            <div id="colorDot" onclick="toggleColorPicker()"
+                                style="width:16px;height:16px;background:#ccc;cursor:pointer;border:2px solid #aaa;"
+                                title="Change color"></div>
+                        </div>
+                        <div id="colorPicker" style="display:none; margin-top:5px;">
+                            <div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">
+                                <div onclick="selectColor(this,'#FF1010')"
+                                    style="width:16px;height:16px;background:#FF1010;cursor:pointer;border:2px solid transparent;"
+                                    class="colorOption"></div>
+                                <div onclick="selectColor(this,'#10FF10')"
+                                    style="width:16px;height:16px;background:#10FF10;cursor:pointer;border:2px solid transparent;"
+                                    class="colorOption"></div>
+                                <div onclick="selectColor(this,'#1010FF')"
+                                    style="width:16px;height:16px;background:#1010FF;cursor:pointer;border:2px solid transparent;"
+                                    class="colorOption"></div>
+                                <div onclick="selectColor(this,'#FF10FF')"
+                                    style="width:16px;height:16px;background:#FF10FF;cursor:pointer;border:2px solid transparent;"
+                                    class="colorOption"></div>
+                                <div onclick="selectColor(this,'#10FFFF')"
+                                    style="width:16px;height:16px;background:#10FFFF;cursor:pointer;border:2px solid transparent;"
+                                    class="colorOption"></div>
+                                <div onclick="selectColor(this,'#FFFF10')"
+                                    style="width:16px;height:16px;background:#FFFF10;cursor:pointer;border:2px solid transparent;"
+                                    class="colorOption"></div>
+                                <div onclick="selectColor(this,'#FF8010')"
+                                    style="width:16px;height:16px;background:#FF8010;cursor:pointer;border:2px solid transparent;"
+                                    class="colorOption"></div>
+                                <span id="colorMsg" style="font-size:12px;color:green;"></span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr id="skinRow" style="display:none;">
+                    <td>Skin:</td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div id="skinPersonalWrap" onclick="setActiveSkin('personal')"
+                                style="width:35px; height:35px; overflow:hidden; border:2px solid #ddd; background:#333; cursor:pointer;">
+                                <img id="skinPreview" src="" style="width:100%; height:100%; object-fit:cover;">
+                            </div>
+                            <div id="skinGuildWrap" onclick="setActiveSkin('guild')"
+                                style="width:35px; height:35px; overflow:hidden; border:2px solid #ddd; background:#555; cursor:pointer; display:none;">
+                                <img id="skinGuildPreview" src="" style="width:100%; height:100%; object-fit:cover;">
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Level:</td>
+                    <td id="accLevel">-</td>
+                </tr>
+                <tr>
+                    <td>Point:</td>
+                    <td id="accPoint">-</td>
+                </tr>
+                <tr>
+                    <td>Guild:</td>
+                    <td id="accGuild">n/a</td>
+                </tr>
+                <tr>
+                    <td>Email:</td>
+                    <td><span id="accEmail">-</span></td>
+                </tr>
+                <tr>
+                    <td>Last login:</td>
+                    <td id="accLastLogin">-</td>
+                </tr>
+            </table>
+
+            <div style="margin-top:12px;">
+                <button onclick="goToSkin()" id="btn-skin" class="btn btn-block"
+                    style="text-align:center; background:linear-gradient(to right, #f0a500, #f5c518); color:white; font-weight:bold; border:none;">
+                    Upload your skin <strong>(required 150 points)</strong>
+                </button>
+                <div id="pointMsg" style="font-size:13px; margin-top:8px; text-align:center;"></div>
+            </div>
+
+            <div id="footer">
+                <div id="footerContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001';
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'login.html';
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += 40) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += 40) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+
+        function xpNeeded(level) {
+            if (level <= 5) return 100 + (level - 1) * 50;
+            if (level <= 10) return 300 + (level - 5) * 100;
+            if (level <= 20) return 800 + (level - 10) * 200;
+            if (level <= 35) return 2800 + (level - 20) * 350;
+            return 8050 + (level - 35) * 500;
+        }
+
+        fetch(`${API_URL}/profile`, {
+            headers: { 'Authorization': token }
+        }).then(r => r.json()).then(data => {
+            if (!data.success) return window.location.href = 'login.html';
+            const u = data.user;
+
+            document.getElementById('accName').innerText = u.username;
+            const email = u.email || '-';
+            document.getElementById('accEmail').innerHTML = email !== '-'
+                ? `<a href="mailto:${email}">${email}</a>`
+                : '-';
+            document.getElementById('accLevel').innerText = u.level;
+            document.getElementById('accLastLogin').innerText = u.last_login ? new Date(u.last_login).toLocaleString() : '-';
+
+            const accTypeEl = document.getElementById('accType');
+            if (u.account_type === 'premium') {
+                accTypeEl.innerHTML = '<span style="color:green; font-weight:bold;">Premium</span>';
+            } else {
+                accTypeEl.innerHTML = 'Free | <a href="#" onclick="buyPremium()">Buy Premium (2 pts)</a>';
+            }
+
+            if (u.guild) {
+                document.getElementById('accGuild').innerHTML = '<a href="guild.html?id=' + u.guild.id + '" style="text-decoration:none;">' + u.guild.name + '</a>';
+            } else {
+                document.getElementById('accGuild').innerHTML = 'n/a - <a href="guilds.html">Join the guild!</a>';
+            }
+            if (u.color) {
+                document.getElementById('colorDot').style.background = u.color;
+            }
+            var userRoles = (u.role || 'user').split(',').map(r => r.trim());
+
+            if (userRoles.includes('admin')) {
+                const colorPicker = document.getElementById('colorPicker').querySelector('div');
+                colorPicker.insertAdjacentHTML('beforeend', `
+        <div onclick="selectColor(this,'#FFFFFF')"
+            style="width:16px;height:16px;background:#FFFFFF;cursor:pointer;border:2px solid transparent;"
+            class="colorOption"></div>
+        <div onclick="selectColor(this,'#000000')"
+            style="width:16px;height:16px;background:#000000;cursor:pointer;border:2px solid #aaa;"
+            class="colorOption"></div>
+    `);
+            }
+            const hasSkin = !!u.skin;
+            const hasGuildSkin = !!(u.guild && u.guild.skin);
+
+            if (hasSkin && hasGuildSkin) {
+                var isPersonalActive = !u.active_skin || u.active_skin === 'personal';
+                document.getElementById('skinRow').style.display = '';
+                document.getElementById('skinPersonalWrap').style.display = '';
+                document.getElementById('skinPreview').src = 'skins/' + u.skin + '.png';
+                document.getElementById('skinPersonalWrap').style.border = isPersonalActive ? '2px solid #4a9eff' : '2px solid #ddd';
+                document.getElementById('skinGuildWrap').style.display = '';
+                document.getElementById('skinGuildPreview').src = 'skins/' + u.guild.skin + '.png';
+                document.getElementById('skinGuildWrap').style.border = !isPersonalActive ? '2px solid #4a9eff' : '2px solid #ddd';
+
+            } else if (hasSkin && !hasGuildSkin) {
+                document.getElementById('skinRow').style.display = '';
+                document.getElementById('skinPersonalWrap').style.display = '';
+                document.getElementById('skinPreview').src = 'skins/' + u.skin + '.png';
+                document.getElementById('skinPersonalWrap').style.border = '2px solid #4a9eff';
+                document.getElementById('skinGuildWrap').style.display = 'none';
+
+            } else if (!hasSkin && hasGuildSkin) {
+                document.getElementById('skinRow').style.display = 'none';
+                localStorage.setItem('activeSkin', 'guild');
+                fetch(`${API_URL}/setskin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                    body: JSON.stringify({ skin_type: 'guild' })
+                });
+
+            } else {
+                document.getElementById('skinRow').style.display = 'none';
+            }
+        });
+
+        function doLogout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        function loadPoints() {
+            fetch(`${API_URL}/points`, {
+                headers: { 'Authorization': token }
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    document.getElementById('accPoint').innerText = data.points + ' pts';
+                }
+            });
+        }
+        loadPoints();
+
+        function toggleColorPicker() {
+            const picker = document.getElementById('colorPicker');
+            picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function selectColor(el, color) {
+            document.querySelectorAll('.colorOption').forEach(e => e.style.border = '2px solid transparent');
+            el.style.border = '2px solid white';
+            document.getElementById('colorDot').style.background = color;
+            fetch(`${API_URL}/setcolor`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                body: JSON.stringify({ color })
+            }).then(r => r.json()).then(data => {
+                const msg = document.getElementById('colorMsg');
+                if (data.success) {
+                    msg.style.color = 'green';
+                    msg.innerText = '✓';
+                    localStorage.setItem('userColor', color);
+                }
+                else { msg.style.color = 'red'; msg.innerText = '✗'; }
+                setTimeout(() => { msg.innerText = ''; document.getElementById('colorPicker').style.display = 'none'; }, 1000);
+            });
+        }
+
+        loadFooter('footerContainer');
+
+        function buyPremium() {
+            if (!confirm('Buy Premium for 2 points?')) return;
+            fetch(`${API_URL}/upgradetopremium`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': token }
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    alert('Upgraded to Premium!');
+                    location.reload();
+                } else {
+                    alert(data.message || 'Failed! Not enough points.');
+                }
+            });
+        }
+
+        function goToSkin() {
+            fetch(`${API_URL}/points`, {
+                headers: { 'Authorization': token }
+            }).then(r => r.json()).then(data => {
+                if (data.success && data.points >= 150) {
+                    sessionStorage.setItem('skinPageAllowed', '1');
+                    window.location.href = 'skin.html';
+                } else {
+                    document.getElementById('pointMsg').style.color = 'red';
+                    document.getElementById('pointMsg').innerText = 'Not enough points! Need 150 pts.';
+                }
+            });
+        }
+
+        function setActiveSkin(type) {
+            fetch(`${API_URL}/setskin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                body: JSON.stringify({ skin_type: type })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    document.getElementById('skinPersonalWrap').style.border = type === 'personal' ? '2px solid #4a9eff' : '2px solid #ddd';
+                    document.getElementById('skinGuildWrap').style.border = type === 'guild' ? '2px solid #4a9eff' : '2px solid #ddd';
+                    localStorage.setItem('activeSkin', type);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

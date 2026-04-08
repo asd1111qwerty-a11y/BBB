@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Play Bubble.am, a free online multiplayer browser game. Eat smaller cells, avoid bigger ones, and climb the leaderboard. No download needed — play now!">
+    <meta name="keywords" content="bubbleam, bubble.am, bubleam, buble.am, bubbleam.pl, bubleroyal.com, bubleroyal, agario, agar, io, cell, cells, virus, bacteria, blob, game, games, web game, html5, fun, flash">
+    <meta name="robots" content="index, follow">
+    <meta name="viewport"
+        content="minimal-ui, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="google-site-verification" content="LiPNDr3AHPS_HBWWsUkIL3tYU5vIMQYR17AD7fvhuN4" />
+
+    <title>Bubble.am</title>
+
+    <link rel="canonical" href="https://bubbleam.site/">
+    <meta property="og:title" content="Bubble.am — Free Bubble.am Browser Game">
+    <meta property="og:description" content="Play Bubble.am free online. Eat smaller cells, avoid bigger ones, climb the leaderboard. No download needed!">
+    <meta property="og:url" content="https://bubbleam.site/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Bubble.am — Free Bubble.am Browser Game">
+    <meta name="twitter:description" content="Play Bubble.am free online. Eat smaller cells, avoid bigger ones!">
+
+    <link id="favicon" rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu:700" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/index.css" rel="stylesheet">
+    <script src="assets/js/footer.js"></script>
+    <style>
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+        }
+
+        .notif-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 6px;
+            border-bottom: 1px solid #f0f0f0;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notif-item.removing {
+            animation: fadeOut 0.2s ease forwards;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+        }
+
+        .guild-avatar-sm {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #eee;
+            background: #ddd;
+            flex-shrink: 0;
+        }
+
+        .notif-text {
+            flex: 1;
+            font-size: 13px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .notif-text strong {
+            color: #337ab7;
+        }
+
+        .notif-text small {
+            display: block;
+            color: #aaa;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        .notif-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .btn-accept {
+            background: #5cb85c;
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, transform 0.1s;
+            flex-shrink: 0;
+        }
+
+        .btn-accept:hover {
+            background: #4cae4c;
+            transform: scale(1.1);
+        }
+
+        .btn-reject {
+            background: #d9534f;
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, transform 0.1s;
+            flex-shrink: 0;
+        }
+
+        .btn-reject:hover {
+            background: #c9302c;
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: #bbb;
+            font-size: 13px;
+        }
+
+        .empty-state div {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .notif-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .notif-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .notif-count-badge {
+            background: #d9534f;
+            color: white;
+            border-radius: 10px;
+            padding: 1px 7px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(60px);
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            z-index: 9999;
+            transition: transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            background: #5cb85c;
+        }
+
+        .toast.error {
+            background: #d9534f;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div id="loginOverlay">
+        <div id="helloDialog">
+            <div style="font-size:14px; margin-bottom:10px;">
+                <a href="index.html">Bubble.am</a> » 
+                <a href="#" style="color: #888;">Notifications</a>
+            </div>
+
+            <div class="notif-header">
+                <span class="notif-title">Notifications</span>
+                <span id="notifBadge" class="notif-count-badge" style="display:none;"></span>
+            </div>
+
+            <div id="notifList">
+                <div class="empty-state">
+                    Loading...
+                </div>
+            </div>
+
+            <div id="footer">
+                <div id="footerContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost'
+            ? 'http://localhost:3001'
+            : 'https://api.bubble.am';
+        const token = localStorage.getItem('token');
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += 40) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += 40) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+
+        function showToast(msg, type = '') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast ' + type + ' show';
+            setTimeout(() => t.className = 'toast ' + type, 2500);
+        }
+
+        function formatTime(dateStr) {
+            const d = new Date(dateStr);
+            const now = new Date();
+            const diff = Math.floor((now - d) / 1000);
+            if (diff < 60) return 'just now';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            return Math.floor(diff / 86400) + 'd ago';
+        }
+
+        function renderNotifs(notifs) {
+            const list = document.getElementById('notifList');
+            const badge = document.getElementById('notifBadge');
+
+            if (!notifs || notifs.length === 0) {
+                badge.style.display = 'none';
+                list.innerHTML = `
+                    <div class="empty-state">
+                        No notifications yet
+                    </div>`;
+                return;
+            }
+
+            badge.style.display = '';
+            badge.textContent = notifs.length;
+
+            list.innerHTML = notifs.map(n => {
+                return `
+        <div class="notif-item" id="notif-${n.id}">
+            <div class="notif-text">
+                <b>${n.from_user}</b> invited you to join
+                <strong><a href="guild.html?id=${n.guild_id}" style="color:#337ab7;">[${n.guild_tag}] ${n.guild_name}</a></strong>
+                <small>${formatTime(n.created_at)}</small>
+            </div>
+        </div>`;
+            }).join('');
+        }
+
+        if (!token) {
+            document.getElementById('notifList').innerHTML = `
+                <div class="empty-state">
+                    <a href="login.html">Login to see notifications</a>
+                </div>`;
+        } else {
+            fetch(`${API_URL}/notifications`, {
+                headers: { 'Authorization': token }
+            }).then(r => r.json()).then(data => {
+                if (data.success) renderNotifs(data.notifications);
+                else renderNotifs([]);
+            }).catch(() => renderNotifs([]));
+        }
+
+        loadFooter('footerContainer');
+    </script>
+</body>
+
+</html>

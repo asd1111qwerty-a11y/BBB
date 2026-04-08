@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Play Bubble.am, a free online multiplayer browser game. Eat smaller cells, avoid bigger ones, and climb the leaderboard. No download needed — play now!">
+    <meta name="keywords" content="bubbleam, bubble.am, bubleam, buble.am, bubbleam.pl, bubleroyal.com, bubleroyal, agario, agar, io, cell, cells, virus, bacteria, blob, game, games, web game, html5, fun, flash">
+    <meta name="robots" content="index, follow">
+    <meta name="viewport"
+        content="minimal-ui, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="google-site-verification" content="LiPNDr3AHPS_HBWWsUkIL3tYU5vIMQYR17AD7fvhuN4" />
+
+    <title>Bubble.am</title>
+
+    <link rel="canonical" href="https://bubbleam.site/">
+    <meta property="og:title" content="Bubble.am — Free Bubble.am Browser Game">
+    <meta property="og:description" content="Play Bubble.am free online. Eat smaller cells, avoid bigger ones, climb the leaderboard. No download needed!">
+    <meta property="og:url" content="https://bubbleam.site/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Bubble.am — Free Bubble.am Browser Game">
+    <meta name="twitter:description" content="Play Bubble.am free online. Eat smaller cells, avoid bigger ones!">
+
+    <link id="favicon" rel="icon" type="image/png" href="assets/img/favicon.png" />
+
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu:700" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/index.css" rel="stylesheet">
+    <script src="assets/js/footer.js"></script>
+    <style>
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+        }
+
+        #footer {
+            position: absolute !important;
+            bottom: 15px !important;
+            left: 0 !important;
+            right: 0 !important;
+            text-align: center !important;
+        }
+
+        .score-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 4px;
+            border-bottom: 1px solid #eee;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .score-rank {
+            color: #888;
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+
+        .score-rank.top1 {
+            color: #f5c518;
+        }
+
+        .score-rank.top2 {
+            color: #aaa;
+        }
+
+        .score-rank.top3 {
+            color: #cd7f32;
+        }
+
+        .score-name {
+            flex: 1;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .score-time {
+            color: #337ab7;
+            font-weight: bold;
+            width: 80px;
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div id="loginOverlay">
+        <div id="helloDialog">
+            <div style="font-size:14px; margin-bottom:10px;">
+                <a href="index.html">Bubble.am</a> »
+                <a href="#" style="color: #888;">Highscore</a>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-bottom:12px; align-items:center;">
+                <select id="serverSelect" class="form-control" onchange="loadScores()" style="flex:1;">
+                    <option value="localhost:8080">Hardcore</option>
+                </select>
+                <select id="periodSelect" class="form-control" onchange="loadScores()" style="flex:1;">
+                    <option value="all">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                </select>
+            </div>
+
+            <div
+                style="display:flex; padding:4px 4px 6px; font-size:12px; color:#aaa; gap:10px; border-bottom:1px solid #eee;">
+                <div style="width:24px; text-align:center;">#</div>
+                <div style="flex:1;">Player</div>
+                <div style="width:80px; text-align:right;">Top 1 Time</div>
+            </div>
+
+            <div id="scoreList" style="max-height:280px; overflow-y:auto;">
+                <div style="text-align:center; padding:20px; color:#888;">Loading...</div>
+            </div>
+
+            <div id="footer" style="position:relative; margin-top:0;">
+                <div id="footerContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost'
+            ? 'http://localhost:3001'
+            : 'https://api.bubble.am';
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += 40) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += 40) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+
+        function formatTime(minutes) {
+            if (minutes < 1) return '< 1 min';
+            if (minutes >= 60) {
+                const h = Math.floor(minutes / 60);
+                const m = minutes % 60;
+                return m > 0 ? `${h}h ${m}m` : `${h}h`;
+            }
+            return `${minutes} min`;
+        }
+
+        function getRankClass(i) {
+            if (i === 0) return 'top1';
+            if (i === 1) return 'top2';
+            if (i === 2) return 'top3';
+            return '';
+        }
+
+        function getRankIcon(i) {
+            if (i === 0) return '🥇';
+            if (i === 1) return '🥈';
+            if (i === 2) return '🥉';
+            return i + 1;
+        }
+
+        function loadScores() {
+            const server = document.getElementById('serverSelect').value;
+            const period = document.getElementById('periodSelect').value;
+            const list = document.getElementById('scoreList');
+            list.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Loading...</div>';
+
+            fetch(`${API_URL}/topscore/${encodeURIComponent(server)}?period=${period}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success || data.scores.length === 0) {
+                        list.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No data yet</div>';
+                        return;
+                    }
+                    list.innerHTML = data.scores.map((s, i) => `
+                        <div class="score-row">
+                            <div class="score-rank ${getRankClass(i)}">${getRankIcon(i)}</div>
+                            <div class="score-name">${s.username}</div>
+                            <div class="score-time">${formatTime(s.minutes)}</div>
+                        </div>
+                    `).join('');
+                });
+        }
+
+        loadScores();
+        loadFooter('footerContainer');
+    </script>
+</body>
+
+</html>

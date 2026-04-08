@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Play Bubble.am, a free online multiplayer browser game. Eat smaller cells, avoid bigger ones, and climb the leaderboard. No download needed — play now!">
+    <meta name="keywords" content="bubbleam, bubble.am, bubleam, buble.am, bubbleam.pl, bubleroyal.com, bubleroyal, agario, agar, io, cell, cells, virus, bacteria, blob, game, games, web game, html5, fun, flash">
+    <meta name="robots" content="index, follow">
+    <meta name="viewport"
+        content="minimal-ui, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="google-site-verification" content="LiPNDr3AHPS_HBWWsUkIL3tYU5vIMQYR17AD7fvhuN4" />
+
+    <title>Bubble.am</title>
+
+    <link rel="canonical" href="https://bubbleam.site/">
+    <meta property="og:title" content="Bubble.am — Free Bubble.am Browser Game">
+    <meta property="og:description" content="Play Bubble.am free online. Eat smaller cells, avoid bigger ones, climb the leaderboard. No download needed!">
+    <meta property="og:url" content="https://bubbleam.site/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Bubble.am — Free Bubble.am Browser Game">
+    <meta name="twitter:description" content="Play Bubble.am free online. Eat smaller cells, avoid bigger ones!">
+
+    <link id="favicon" rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu:700" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/index.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <script src="assets/js/footer.js"></script>
+    <style>
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            padding: 7px 18px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #888;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab.active {
+            color: #337ab7;
+            border-bottom: 2px solid #337ab7;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .member-row {
+            display: flex;
+            align-items: center;
+            padding: 7px 4px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            gap: 10px;
+        }
+
+        .member-row.is-leader {
+            background: #fffde7;
+        }
+
+        .role-leader {
+            font-weight: bold;
+        }
+
+        .role-staff {
+            font-weight: bold;
+        }
+
+        .role-member {
+            color: #aaa;
+        }
+
+        .member-name {
+            flex: 1;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .member-level {
+            color: #888;
+            width: 40px;
+            text-align: center;
+        }
+
+        .member-online {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ccc;
+            flex-shrink: 0;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 2px 4px;
+            font-size: 14px;
+            line-height: 1;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+
+        .icon-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+
+        .info-label {
+            color: #888;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .guild-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .guild-avatar-lg {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #ddd;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 2px solid #eee;
+        }
+
+        .guild-avatar-lg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .btn-action {
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: none;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-invite {
+            background: #5cb85c;
+        }
+
+        .btn-edit {
+            background: #5cb85c;
+        }
+
+        .btn-delete {
+            background: #d9534f;
+        }
+
+        .log-row {
+            padding: 8px 4px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 12px;
+            color: #555;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .log-time {
+            color: #bbb;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        #inviteModal,
+        #editModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #guildTagDisplay {
+            font-size: 13px;
+            color: #888;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div id="loginOverlay">
+        <div id="helloDialog">
+            <div style="font-size:14px; color:#888; margin-bottom:10px;">
+                <a href="index.html">Bubble.am</a> »
+                <a href="guilds.html" style="color:#888;">Guilds</a> »
+                <span id="breadcrumbName">...</span>
+            </div>
+
+            <div class="guild-header">
+                <div style="position:relative; width:64px; height:64px; flex-shrink:0;">
+                    <img id="guildAvatar" src="#"
+                        style="width:64px; height:64px; border-radius:50%; object-fit:cover; border:2px solid #eee;">
+                    <div id="guildTagOverlay" style="
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%, -50%);
+    color:white;
+    font-size:13px;
+    font-weight:bold;
+    text-align:center;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+"></div>
+                </div>
+                <div>
+                    <div style="font-size:17px; font-weight:bold; color:#333;" id="guildTitle">Loading...</div>
+                    <div style="font-size:13px; color:#888;" id="guildTagDisplay"></div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('members')">Members</div>
+                <div class="tab" onclick="switchTab('info')">Info</div>
+                <div class="tab" onclick="switchTab('statistics')">Statistics</div>
+                <div class="tab" id="logsTab" style="display:none;" onclick="switchTab('logs')">Logs</div>
+            </div>
+
+            <div id="tab-members" class="tab-content active">
+                <div
+                    style="display:flex; padding:4px 4px 6px; font-size:12px; color:#aaa; gap:10px; border-bottom:1px solid #eee;">
+                    <div style="width:70px; min-width:70px;">#</div>
+                    <div style="flex:1;">Name</div>
+                    <div style="width:40px; text-align:center;">Level</div>
+                    <div style="width:10px;"></div>
+                </div>
+                <div id="membersList" style="max-height:180px; overflow-y:auto;">
+                    <div style="text-align:center; padding:20px; color:#888;">Loading...</div>
+                </div>
+                <div id="actionButtons"
+                    style="display:none; margin-top:12px; display:flex; gap:8px; justify-content:flex-end;"></div>
+            </div>
+
+            <div id="tab-info" class="tab-content">
+                <div class="info-row"><span class="info-label">Guild name</span><span class="info-value"
+                        id="infoName">-</span></div>
+                <div class="info-row"><span class="info-label">Tag</span><span class="info-value" id="infoTag">-</span>
+                </div>
+                <div class="info-row"><span class="info-label">Type</span><span class="info-value"
+                        id="infoType">-</span></div>
+                <div class="info-row"><span class="info-label">Leader</span><span class="info-value"
+                        id="infoLeader">-</span></div>
+                <div class="info-row"><span class="info-label">Members</span><span class="info-value"
+                        id="infoMembers">-</span></div>
+            </div>
+
+            <div id="tab-statistics" class="tab-content">
+                <div class="info-row"><span class="info-label">Total members</span><span class="info-value"
+                        id="statMembers">-</span></div>
+                <div class="info-row"><span class="info-label">Average level</span><span class="info-value"
+                        id="statAvgLevel">-</span></div>
+                <div class="info-row"><span class="info-label">Highest level</span><span class="info-value"
+                        id="statMaxLevel">-</span></div>
+            </div>
+
+            <div id="tab-logs" class="tab-content">
+                <div id="logsList" style="max-height:220px; overflow-y:auto;">
+                    <div style="text-align:center; padding:20px; color:#888;">Loading...</div>
+                </div>
+            </div>
+
+            <hr>
+            <div id="footer">
+                <div id="footerContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="inviteModal">
+        <div style="background:white; border-radius:12px; padding:24px; width:300px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h4 style="margin:0;">Invite Player</h4>
+                <span onclick="closeInviteModal()" style="cursor:pointer; font-size:18px; color:#aaa;">✕</span>
+            </div>
+            <input id="inviteUsername" type="text" class="form-control" placeholder="Username"
+                style="margin-bottom:10px;">
+            <div id="inviteMsg" style="font-size:13px; text-align:center; margin-bottom:8px;"></div>
+            <button onclick="doInvite()" class="btn btn-block"
+                style="background:#5cb85c; color:white; border:none; padding:10px; font-weight:bold;">Invite</button>
+        </div>
+    </div>
+
+    <div id="editModal">
+        <div style="background:white; border-radius:12px; padding:24px; width:300px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h4 style="margin:0;">Edit Guild</h4>
+                <span onclick="closeEditModal()" style="cursor:pointer; font-size:18px; color:#aaa;">✕</span>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:13px; color:#555;">Description</label>
+                <textarea id="editDesc" class="form-control" placeholder="Guild description..." maxlength="100" rows="3"
+                    style="resize:vertical;"></textarea>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:13px; color:#555;">Guild Type</label>
+                <select id="editType" class="form-control">
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                </select>
+            </div>
+            <div id="editMsg" style="font-size:13px; text-align:center; margin-bottom:8px;"></div>
+            <button onclick="doEdit()" class="btn btn-block"
+                style="background:#5cb85c; color:white; border:none; padding:10px; font-weight:bold;">Save</button>
+        </div>
+    </div>
+
+    <div id="alertModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; justify-content:center; align-items:center;">
+        <div style="background:white; border-radius:12px; padding:24px; width:280px; text-align:center;">
+            <div id="alertMsg" style="font-size:14px; color:#333; margin-bottom:16px;"></div>
+            <button onclick="closeAlert()"
+                style="background:#337ab7; color:white; border:none; padding:8px 24px; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;">OK</button>
+        </div>
+    </div>
+
+    <div id="confirmModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; justify-content:center; align-items:center;">
+        <div style="background:white; border-radius:12px; padding:24px; width:280px; text-align:center;">
+            <div id="confirmMsg" style="font-size:14px; color:#333; margin-bottom:16px;"></div>
+            <div style="display:flex; gap:8px; justify-content:center;">
+                <button id="confirmOkBtn"
+                    style="background:#337ab7; color:white; border:none; padding:8px 24px; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;">Yes</button>
+                <button onclick="closeConfirm()"
+                    style="background:#aaa; color:white; border:none; padding:8px 24px; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001';
+        const token = localStorage.getItem('token');
+        const loggedUser = localStorage.getItem('loggedUser');
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += 40) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += 40) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const guildId = params.get('id');
+        if (!guildId) window.location.href = 'guilds.html';
+
+        let guildData = null;
+        let myRole = null;
+
+        function showAlert(msg) {
+            document.getElementById('alertMsg').textContent = msg;
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+        function closeAlert() {
+            document.getElementById('alertModal').style.display = 'none';
+        }
+        function showConfirm(msg, onYes) {
+            document.getElementById('confirmMsg').textContent = msg;
+            document.getElementById('confirmModal').style.display = 'flex';
+            document.getElementById('confirmOkBtn').onclick = () => { closeConfirm(); onYes(); };
+        }
+        function closeConfirm() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        function switchTab(name) {
+            const tabs = ['members', 'info', 'statistics', 'logs'];
+            document.querySelectorAll('.tab').forEach((t, i) => {
+                if (tabs[i]) t.classList.toggle('active', tabs[i] === name);
+            });
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + name).classList.add('active');
+            if (name === 'logs') loadLogs();
+        }
+
+        function renderGuild(guild) {
+            guildData = guild;
+            document.getElementById('breadcrumbName').textContent = guild.name;
+            document.getElementById('guildTitle').textContent = guild.name;
+            function linkify(text) {
+                return text
+                    .replace(/\n/g, '<br>')
+                    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+            }
+
+            document.getElementById('guildTagDisplay').innerHTML = guild.description
+                ? linkify(guild.description)
+                : '<span style="color:#bbb; font-style:italic;">No description</span>';
+
+            if (guild.skin) {
+                document.getElementById('guildAvatar').src = 'skins/' + guild.skin + '.png';
+            }
+
+            document.getElementById('guildTagOverlay').textContent = '[' + guild.tag + ']';
+
+            document.getElementById('infoName').textContent = guild.name;
+            document.getElementById('infoTag').textContent = '[' + guild.tag + ']';
+            document.getElementById('infoType').textContent = guild.type || 'public';
+            document.getElementById('infoLeader').textContent = guild.leader_name || '-';
+            document.getElementById('infoMembers').textContent = guild.members ? guild.members.length : 0;
+
+            const levels = (guild.members || []).map(m => m.level || 1);
+            document.getElementById('statMembers').textContent = guild.members ? guild.members.length : 0;
+            document.getElementById('statAvgLevel').textContent = levels.length
+                ? (levels.reduce((a, b) => a + b, 0) / levels.length).toFixed(1) : '-';
+            document.getElementById('statMaxLevel').textContent = levels.length ? Math.max(...levels) : '-';
+
+            myRole = null;
+            if (loggedUser) {
+                if (guild.leader_name === loggedUser) {
+                    myRole = 'leader';
+                } else if (guild.members) {
+                    const me = guild.members.find(m => m.username === loggedUser);
+                    if (me) myRole = me.guild_role === 'staff' ? 'staff' : 'member';
+                }
+            }
+
+            renderMembers(guild);
+            renderActionButtons();
+
+            if (myRole === 'leader') {
+                document.getElementById('logsTab').style.display = '';
+            }
+        }
+
+        function renderMembers(guild) {
+            const membersList = document.getElementById('membersList');
+            if (!guild.members || guild.members.length === 0) {
+                membersList.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No members</div>';
+                return;
+            }
+
+            const roleOrder = { leader: 0, staff: 1, member: 2 };
+            const sorted = [...guild.members].sort((a, b) => {
+                const aRole = a.id === guild.leader_id ? 'leader' : (a.guild_role === 'staff' ? 'staff' : 'member');
+                const bRole = b.id === guild.leader_id ? 'leader' : (b.guild_role === 'staff' ? 'staff' : 'member');
+                return (roleOrder[aRole] || 0) - (roleOrder[bRole] || 0);
+            });
+            membersList.innerHTML = sorted.map(m => {
+                const isLeader = m.id === guild.leader_id;
+                const isStaff = m.guild_role === 'staff';
+                const roleLabel = isLeader ? 'Leader' : (isStaff ? 'Staff' : 'Member');
+                const roleClass = isLeader ? 'role-leader' : (isStaff ? 'role-staff' : 'role-member');
+
+                let roleDisplay = '';
+                if (myRole === 'leader' && !isLeader) {
+                    const crownStyle = isStaff ? '' : 'opacity:0.4';
+                    const crownTitle = isStaff ? 'Remove staff' : 'Promote to staff';
+                    roleDisplay = `
+                        <div style="display:flex; flex-direction:row; gap:2px; align-items:center; width:70px; min-width:70px;">
+                            <button class="icon-btn" title="${crownTitle}" style="${crownStyle}" onclick="toggleStaff(${m.id}, '${m.username}', ${isStaff})"><i class="fa-solid fa-crown"></i></button>
+                            <button class="icon-btn" title="Kick member" onclick="kickMember(${m.id}, '${m.username}')"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>`;
+                } else {
+                    roleDisplay = `<div style="width:70px; min-width:70px; font-size:12px;" class="${roleClass}">${roleLabel}</div>`;
+                }
+
+                return `
+                    <div class="member-row ${isLeader ? 'is-leader' : ''}">
+                        ${roleDisplay}
+                        <div class="member-name">${m.username}</div>
+                        <div class="member-level">${m.level || 1}</div>
+                        <div class="member-online"></div>
+                    </div>`;
+            }).join('');
+        }
+
+        async function checkPendingInvite(guildId) {
+            if (!token) return false;
+            const r = await fetch(`${API_URL}/notifications`, { headers: { 'Authorization': token } });
+            const data = await r.json();
+            if (!data.success) return false;
+            return data.notifications.some(n => n.guild_id == guildId);
+        }
+
+        async function renderActionButtons() {
+            const btns = document.getElementById('actionButtons');
+            btns.innerHTML = '';
+
+            if (!myRole && loggedUser && guildData) {
+                const hasInvite = await checkPendingInvite(guildData.id);
+                if (guildData.type === 'public' || hasInvite) {
+                    btns.style.display = 'flex';
+                    btns.innerHTML = `<button class="btn-action btn-invite" onclick="joinGuild()">Join Guild</button>`;
+                    return;
+                }
+                btns.style.display = 'none';
+                return;
+            }
+
+            if (!myRole) { btns.style.display = 'none'; return; }
+
+            btns.style.display = 'flex';
+            if (myRole === 'leader') {
+                btns.innerHTML = `
+            <button class="btn-action btn-invite" onclick="openInviteModal()">Invite player</button>
+            <button class="btn-action btn-edit" onclick="openEditModal()">Edit</button>
+            <button class="btn-action btn-delete" onclick="deleteGuild()">Delete</button>`;
+            } else if (myRole === 'staff') {
+                btns.innerHTML = `
+            <button class="btn-action btn-invite" onclick="openInviteModal()">Invite player</button>
+            <button class="btn-action btn-delete" onclick="leaveGuild()">Leave</button>`;
+            } else {
+                btns.innerHTML = `
+            <button class="btn-action btn-delete" onclick="leaveGuild()">Leave</button>`;
+            }
+        }
+
+        function toggleStaff(memberId, username, isStaff) {
+            showConfirm((isStaff ? 'Remove staff from ' : 'Promote ') + username + '?', () => {
+                fetch(`${API_URL}/guildsetrole`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                    body: JSON.stringify({ member_id: memberId, role: isStaff ? 'member' : 'staff' })
+                }).then(r => r.json()).then(data => {
+                    if (data.success) location.reload();
+                    else showAlert('Failed: ' + (data.message || 'Error'));
+                });
+            });
+        }
+
+        function kickMember(memberId, username) {
+            showConfirm('Kick ' + username + ' from the guild?', () => {
+                fetch(`${API_URL}/kickmember`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                    body: JSON.stringify({ member_id: memberId })
+                }).then(r => r.json()).then(data => {
+                    if (data.success) location.reload();
+                    else showAlert('Failed: ' + (data.message || 'Error'));
+                });
+            });
+        }
+
+        function loadLogs() {
+            const logsList = document.getElementById('logsList');
+            logsList.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Loading...</div>';
+            fetch(`${API_URL}/guildlogs/${guildId}`, {
+                headers: token ? { 'Authorization': token } : {}
+            }).then(r => r.json()).then(data => {
+                if (!data.success || !data.logs || data.logs.length === 0) {
+                    logsList.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No logs yet</div>';
+                    return;
+                }
+                logsList.innerHTML = data.logs.map(log => {
+                    const time = new Date(log.created_at).toLocaleString();
+                    return `<div class="log-row">
+                        <span style="flex:1;">${log.description}</span>
+                        <span class="log-time">${time}</span>
+                    </div>`;
+                }).join('');
+            }).catch(() => {
+                logsList.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Failed to load logs</div>';
+            });
+        }
+
+        fetch(`${API_URL}/guild/${guildId}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) renderGuild(data.guild);
+                else window.location.href = 'guilds.html';
+            }).catch(() => window.location.href = 'guilds.html');
+
+        function openInviteModal() { document.getElementById('inviteModal').style.display = 'flex'; }
+        function closeInviteModal() {
+            document.getElementById('inviteModal').style.display = 'none';
+            document.getElementById('inviteMsg').textContent = '';
+            document.getElementById('inviteUsername').value = '';
+        }
+
+        function doInvite() {
+            const username = document.getElementById('inviteUsername').value.trim();
+            const msg = document.getElementById('inviteMsg');
+            if (!username) { msg.style.color = 'red'; msg.textContent = 'Enter a username!'; return; }
+            fetch(`${API_URL}/inviteplayer`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                body: JSON.stringify({ username })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    msg.style.color = 'green';
+                    msg.textContent = '✓ Player invited!';
+                    setTimeout(() => { closeInviteModal(); location.reload(); }, 1500);
+                } else {
+                    msg.style.color = 'red';
+                    msg.textContent = '✗ ' + (data.message || 'Failed');
+                }
+            });
+        }
+
+        function openEditModal() {
+            document.getElementById('editType').value = guildData ? (guildData.type || 'public') : 'public';
+            document.getElementById('editModal').style.display = 'flex';
+            document.getElementById('editDesc').value = guildData ? (guildData.description || '') : '';
+        }
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            document.getElementById('editMsg').textContent = '';
+        }
+
+        function doEdit() {
+            const msg = document.getElementById('editMsg');
+            const type = document.getElementById('editType').value;
+            const description = document.getElementById('editDesc').value.trim();
+            fetch(`${API_URL}/editguild`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                body: JSON.stringify({ type, description })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    msg.style.color = 'green';
+                    msg.textContent = '✓ Updated!';
+                    setTimeout(() => { closeEditModal(); location.reload(); }, 1500);
+                } else {
+                    msg.style.color = 'red';
+                    msg.textContent = '✗ ' + (data.message || 'Failed');
+                }
+            });
+        }
+
+        function deleteGuild() {
+            showConfirm('Delete this guild? This cannot be undone!', () => {
+                fetch(`${API_URL}/deleteguild`, {
+                    method: 'POST',
+                    headers: { 'Authorization': token }
+                }).then(r => r.json()).then(data => {
+                    if (data.success) { showAlert('Guild deleted!'); setTimeout(() => window.location.href = 'guilds.html', 1000); }
+                    else showAlert('Failed: ' + (data.message || 'Unknown error'));
+                });
+            });
+        }
+
+        function leaveGuild() {
+            showConfirm('Leave this guild?', () => {
+                fetch(`${API_URL}/leaveguild`, {
+                    method: 'POST',
+                    headers: { 'Authorization': token }
+                }).then(r => r.json()).then(data => {
+                    if (data.success) { showAlert('You left the guild!'); setTimeout(() => window.location.href = 'guilds.html', 1000); }
+                    else showAlert('Failed: ' + (data.message || 'Unknown error'));
+                });
+            });
+        }
+
+        function joinGuild() {
+            if (!token) { alert('Login dulu!'); window.location.href = 'login.html'; return; }
+            if (!token) { showAlert('Login dulu!'); return; }
+            showConfirm('Join guild ' + guildData.name + '?', () => {
+                fetch(`${API_URL}/joinguild`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                    body: JSON.stringify({ guild_id: guildId })
+                }).then(r => r.json()).then(data => {
+                    if (data.success) { showAlert('Successfully joined the guild!'); setTimeout(() => location.reload(), 1000); }
+                    else showAlert(data.message || 'Error');
+                });
+            });
+        }
+
+        loadFooter('footerContainer');
+    </script>
+</body>
+
+</html>

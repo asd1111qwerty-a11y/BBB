@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Play Bubble.am, a free online multiplayer browser game. Eat smaller cells, avoid bigger ones, and climb the leaderboard. No download needed — play now!">
+    <meta name="keywords" content="bubbleam, bubble.am, bubleam, buble.am, bubbleam.pl, bubleroyal.com, bubleroyal, agario, agar, io, cell, cells, virus, bacteria, blob, game, games, web game, html5, fun, flash">
+    <meta name="robots" content="index, follow">
+    <meta name="viewport"
+        content="minimal-ui, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="google-site-verification" content="LiPNDr3AHPS_HBWWsUkIL3tYU5vIMQYR17AD7fvhuN4" />
+
+    <title>Bubble.am</title>
+
+    <link rel="canonical" href="https://bubbleam.site/">
+    <meta property="og:title" content="Bubble.am — Free Bubble.am Browser Game">
+    <meta property="og:description" content="Play Bubble.am free online. Eat smaller cells, avoid bigger ones, climb the leaderboard. No download needed!">
+    <meta property="og:url" content="https://bubbleam.site/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Bubble.am — Free Bubble.am Browser Game">
+    <meta name="twitter:description" content="Play Bubble.am free online. Eat smaller cells, avoid bigger ones!">
+
+    <link id="favicon" rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu:700" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/index.css" rel="stylesheet">
+    <script src="assets/js/footer.js"></script>
+    <style>
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+        }
+
+        #helloDialog {
+            top: 50% !important;
+            min-height: 420px !important;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+
+    <div id="loginOverlay">
+        <div id="helloDialog">
+            <div class="form-group">
+                <a href="index.html" style="font-size:14px;">Bubble.am</a>
+                <span style="font-size:14px; color:#888;"> » Login</span>
+            </div>
+
+            <div class="form-group">
+                <input id="username" class="form-control" placeholder="Nick" style="margin-bottom:10px;">
+                <input id="password" class="form-control" type="password" placeholder="Password">
+            </div>
+
+            <div id="msg" style="font-size:13px; margin-bottom:8px;"></div>
+
+            <button onclick="doLogin()" class="btn btn-primary" style="width:48%; margin-right:2%;">Login</button>
+            <button onclick="window.location.href='register.html'" class="btn btn-info" style="width:48%;">Register</button>
+
+            <div id="footer">
+                <div id="footerContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001';
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = 1;
+        const gridSize = 40;
+        for (let x = 0; x < canvas.width; x += gridSize) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += gridSize) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+
+        async function doLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const msg = document.getElementById('msg');
+            if (!username || !password) return msg.innerText = 'Username and password are required!';
+            const res = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('loggedUser', data.username);
+                const profile = await fetch(`${API_URL}/profile`, {
+                    headers: { 'Authorization': data.token }
+                });
+                const pdata = await profile.json();
+                if (pdata.success) {
+                    const u = pdata.user;
+                    if (u.guild) {
+                        localStorage.setItem('userGuildName', u.guild.tag);
+                        if (u.guild.skin) {
+                            const guildSkinFile = u.guild.skin.split('/').pop().replace('.png', '');
+                            localStorage.setItem('userGuildSkin', guildSkinFile);
+                        }
+                    }
+                    if (u.skin) localStorage.setItem('userSkin', u.skin);
+                    else localStorage.removeItem('userSkin');
+                    if (u.active_skin) localStorage.setItem('activeSkin', u.active_skin);
+                    if (u.color) localStorage.setItem('userColor', u.color);
+                    if (u.account_type) localStorage.setItem('accountType', u.account_type);
+                }
+                window.location.href = 'index.html';
+            } else {
+                msg.style.color = 'red';
+                msg.innerText = data.message;
+            }
+        }
+
+        async function doRegister() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const msg = document.getElementById('msg');
+            if (!username || !password) return msg.innerText = 'Username and password are required!';
+            const res = await fetch(`${API_URL}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            msg.style.color = data.success ? 'green' : 'red';
+            msg.innerText = data.message;
+        }
+
+        loadFooter('footerContainer');
+    </script>
+</body>
+
+</html>

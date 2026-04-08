@@ -1,0 +1,1 @@
+{"current_players":2,"alive":1,"spectators":1,"max_players":64,"gamemode":"Free For All","start_time":"2026-04-07T12:54:53.432Z","title":"Bubble.am"}
